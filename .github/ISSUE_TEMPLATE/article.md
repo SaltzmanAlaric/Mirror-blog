@@ -1,7 +1,7 @@
 ---
-name: 文章
-about: 创建
-title: "标题"
+name: article
+about: create
+title: "title"
 labels: 'article'
 assignees: ''
 
