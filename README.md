@@ -1,2 +1,0 @@
-# Mirror-blog
-Mirror-blog

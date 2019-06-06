@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title> export </title>
+    <link rel="shortcut icon" href="favicon.ico" />
+    <script type="text/javascript" src="jquery-3.3.1.min.js"></script>
+    <script type="text/javascript" src="FileSave.js"></script>
+    <script src="jszip.min.js"></script>
+    <script src="jszip-utils.min.js"></script>
+    <script src="moment.js"></script>
+    <style type="text/css">
+    	.error{
+    		color: #F00;
+    	}
+    	.normal{
+    		color: #00F;
+    	}
+    	.wrapper{
+    		height:880px;
+    		overflow:auto;
+    		background:#EEEEEE;
+    		overflow-y:scroll;
+    	}
+    </style>
+</head>
+<body>
+	<p align="center">GET式url:<input style="width:300px" value='https://api.github.com/repos/saltzmanalaric/Mirror-blog/issues' id='url'/> <input type='button' id='btn' value='查询'/> <input type='button' id='exp' value='导出zip'/>
+	<input type='button' id='write' value='写入内容'/>
+	<input type='button' id='gen' value='生成文件'/>
+	</p>
+	<p id='tips'></p>
+	<div id="responseWrapper" class="wrapper">
+		<p id="response"></p>
+	</div>
+	<div align="center" hidden id="contentWrapper" class="wrapper">
+		<textarea autofocus id="content" placeholder='文本内容' rows="50" cols="220"></textarea>
+	</div>
+	 </div> 
+	<script type="text/javascript">
+		var origin_data = [];
+		$('#btn').click(function(){
+			var sendDate = moment();
+			$("#responseWrapper").show();
+			$("#contentWrapper").hide();
+			$.ajax({
+				url: $("#url").val(),
+				type: 'GET',
+				success: function(data){
+					$("#response").html("");
+					console.log(data);
+					$('#tips').html('<span style="color:gray;">' + moment().format('YYYY-MM-DD HH:mm:ss')+ '</span><br/>花费时间：'+  moment().diff(sendDate) +'毫秒');
+					$('#tips').addClass('normal');
+					origin_data = data;
+					for (var i=0,cnt = 0,size = data.length;i<size;i++) {
+						$('#response').append("<span style='color:red'>"+(cnt++)+'.</span><br/>'); 
+						$('#response').append(formatJson(data[i]));
+						$('#response').append("<hr/>");
+					}
+					
+     	 	},
+     	 	error: function(err) {
+     	 		$('#tips').html('url获取数据异常！<br/>'+ err.responseText);
+     	 		$('#tips').removeClass('normal').addClass('error');
+     	 	}
+     	 	
+     	}); // end ajax
+		})
+		
+		$('#exp').click(function(){
+				var zip = new JSZip();
+				for (var i=0,size = origin_data.length;i<size;i++) {
+					var title = i +"."+ origin_data[i].title+".md";
+					var content = '';
+					var create = moment(origin_data[i].created_at).format('YYYY-MM-DD HH:mm:ss');
+					var update = moment(origin_data[i].updated_at).format('YYYY-MM-DD HH:mm:ss');
+					var labels = [];
+					if (origin_data[i].labels) {
+						for(var index in origin_data[i].labels) {
+							labels.push(origin_data[i].labels[index].name);
+						}
+					}
+					content = '---\n';
+					content += 'title: '+origin_data[i].title+'\n';
+					content += 'create: '+create+'\n';
+					content += 'update: '+ update+'\n';
+					content += 'labels: '+labels.join(',')+'\n';
+					content += '---\n';
+					content == origin_data[i].body;
+				
+					zip.file(title, content);
+				}
+				zip.generateAsync({type:"blob"}).then(function(content) {					
+					saveAs(content, "articles" + moment().format('YYYYDDMM') + ".zip");
+				});
+		})
+		
+		$('#write').click(function(){
+			$("#responseWrapper").hide();
+			$("#contentWrapper").show();
+			$('#content').val("")
+		})
+		
+
+		$('#gen').click(function(){
+			downloadFile($('#content').val(), moment().format('YYYYDDMM'));	
+		})
+		
+		//textarea支持tab缩进
+    $("textarea").on('keydown',function(e) {
+        if (e.keyCode == 9) {
+            e.preventDefault();
+            var indent = '    ';
+            var start = this.selectionStart;
+            var end = this.selectionEnd;
+            var selected = window.getSelection().toString();
+            selected = indent + selected.replace(/\n/g, '\n' + indent);
+            this.value = this.value.substring(0, start) + selected + this.value.substring(end);
+            this.setSelectionRange(start + indent.length, start + selected.length);
+        }
+    })
+		
+		/**
+		 * 下载文件
+		 */
+		var downloadFile = function(content, file_name) {
+    	var file = new File([content], file_name, { type: "text/plain;charset=utf-8" });
+    	saveAs(file);
+    }
+		
+		// 格式化json字符串
+		function formatJson(msg) {
+        var rep = "~";
+        var jsonStr = JSON.stringify(msg, null, rep)
+        var str = "";
+        for (var i = 0; i < jsonStr.length; i++) {
+            var text2 = jsonStr.charAt(i)
+            if (i > 1) {
+                var text = jsonStr.charAt(i - 1)
+                if (rep != text && rep == text2) {
+                    str += "<br/>"
+                }
+            }
+            str += text2;
+        }
+        jsonStr = "";
+        for (var i = 0; i < str.length; i++) {
+            var text = str.charAt(i);
+            if (rep == text)
+                jsonStr += "    ";//"        "
+            else {
+                jsonStr += text;
+            }
+            if (i == str.length - 2)
+                jsonStr += "<br/>"
+        }
+        return jsonStr;
+    }
+	</script>
+</body>
+</html>
