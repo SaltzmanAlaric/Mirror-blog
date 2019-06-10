@@ -14,7 +14,7 @@
 <body>
 <div id="app">
     <el-row :gutter="20">
-        <el-col :span="14" :offset="5">
+        <el-col :span="20" :offset="5">
             <el-input style="width:500px" placeholder="请输入内容" v-model="url">
                <!-- <template slot="prepend">Http://</template>-->
                 <i v-if="!searchIcon" slot="prefix" class="el-input__icon el-icon-search"></i>
@@ -25,6 +25,8 @@
             <el-button type="primary" plain @click="openEdit()"><i class="el-icon-edit"></i>打开文本</el-button>
             <el-button type="primary" plain @click="fmtJson()"><i class="el-icon-c-scale-to-original"></i>json格式化</el-button>
             <el-button type="primary" plain @click="expFile()"><i class="el-icon-document"></i>一键生成</el-button>
+            <el-button @click="reset()" icon="el-icon-refresh">重置</el-button>
+
         </el-col>
     </el-row>
     <div id="articlesWrapper">
@@ -69,7 +71,6 @@
                 text: '',
                 textarea: '',
                 searchIcon: false,
-                cole: '#f00',
             }
         },
         methods: {
@@ -113,6 +114,16 @@
             // 格式化日期
             fmtDate(value, row, column) {
                 return moment(column).format('YYYY-MM-DD HH:mm:ss');
+            },
+            // 重置
+            reset() {
+                this.url = 'https://api.github.com/repos/saltzmanalaric/Mirror-blog/issues';
+                this.origin_data = [];
+                this.plain_text = '';
+                this.search = '';
+                this.text = '';
+                this.textarea = '';
+                this.searchIcon = false;
             },
             // 导出zip
             expZip: function () {
@@ -180,6 +191,7 @@
                     }
                 } catch (e) {
                     this.$message({
+                        type: 'error',
                         dangerouslyUseHTMLString: true,
                         message: '<strong>错了哦，不是json字符串</strong><br/>' + e
                     });
