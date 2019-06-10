@@ -14,17 +14,20 @@
 <body>
 	<div id="app">
         <el-row :gutter="18">
-            <el-col :span="12" :offset="6">
+            <el-col :span="13" :offset="6">
                 <el-input style="width:500px" placeholder="请输入内容" v-model="url">
                     <template slot="prepend">Http://</template>
                     <i slot="prefix" class="el-input__icon el-icon-search"></i>
                 </el-input>
-                <el-button type="primary" plain  @click="issuesList()">查询</el-button>
-                <el-button type="primary" plain @click="expZip()">导出zip</el-button>
-                <el-button type="primary" plain @click="expFile()">一键生成</el-button>
+                <el-button type="primary" plain  @click="issuesList()"><i class="el-icon-search"></i>查询</el-button>
+                <el-button type="primary" plain @click="expZip()"><i class="el-icon-bank-card"></i>导出zip</el-button>
+                <el-button type="primary" plain @click="openEdit()"><i class="el-icon-edit"></i>打开文本</el-button>
+                <el-button type="primary" plain @click="expFile()"><i class="el-icon-document"></i>一键生成</el-button>
             </el-col>
         </el-row>
+        <div id="articlesWrapper">
         <el-table
+                v-loading="loading"
                 :data="origin_data.filter(data => !search || data.body.toLowerCase().includes(search.toLowerCase()) || data.title.toLowerCase().includes(search.toLowerCase()))"
                 style="width: 100%" :default-sort = "{prop: 'created_at', order: 'descending'}">
             <el-table-column label="序号" type="index"></el-table-column>
@@ -42,11 +45,25 @@
                 </template>
             </el-table-column>
         </el-table>
+        </div>
+        <div id="editWrapper" hidden>
+        <el-input
+                type="textarea"
+                placeholder="请输入内容"
+                v-model="plain_text"
+                maxlength="1000"
+                :rows="40"
+                show-word-limit
+        >
+        </el-input>
+        </div>
 	<!--el-dialog v-loading="loading" :visible.sync="visible" center :title.sync="title">
         {{ data }}
     </el-dialog>-->
-    <!-- <el-input type="textarea" :rows="40" v-model="plain_text"></el-input>-->
+   <!-- <el-input type="textarea" :rows="40" v-model="plain_text"></el-input>-->
+        <el-backtop @click="backTop"></el-backtop>
     </div>
+
 	<!-- import Vue before Element -->
   <script src="https://unpkg.com/vue/dist/vue.js"></script>
   <!-- import JavaScript -->
@@ -59,31 +76,17 @@
         	visible: false,
         	url: 'https://api.github.com/repos/saltzmanalaric/Mirror-blog/issues',
             data: 'loading...',
-            // title: '请求结果',
             origin_data: [],
             plain_text: '',
-            tableData: [/*{
-                date: '2016-05-02',
-                name: '王小虎',
-                address: '上海市普陀区金沙江路 1518 弄'
-            }, {
-                date: '2016-05-04',
-                name: '王小虎',
-                address: '上海市普陀区金沙江路 1517 弄'
-            }, {
-                date: '2016-05-01',
-                name: '王小虎',
-                address: '上海市普陀区金沙江路 1519 弄'
-            }, {
-                date: '2016-05-03',
-                name: '王小虎',
-                address: '上海市普陀区金沙江路 1516 弄'
-            }*/],
             search: '',
+            text: '',
+            textarea: '',
         }
       },
       methods: {
 	      issuesList(){
+              $("#articlesWrapper").show();
+              $("#editWrapper").hide();
 	        var that = this;
             var sendDate = moment();
               $.ajax({
@@ -118,12 +121,14 @@
               return moment(column).format('YYYY-MM-DD HH:mm:ss');
           },
           expZip: function() {
+              $("#articlesWrapper").show();
+              $("#editWrapper").hide();
               var zip = new JSZip();
               var origin_data = this.origin_data;
               if (!origin_data || origin_data.length == 0) {
                   this.$message({
                       showClose: true,
-                      message: '导出失败，可能无数据哦',
+                      message: '导出失败，可能无数据哦，请重新查询',
                       type: 'error'
                   });
                   return;
@@ -154,14 +159,19 @@
                   saveAs(content, "articles" + moment().format('YYYYDDMM') + ".zip");
               });
           },
+          openEdit: function() {
+              $("#articlesWrapper").hide();
+              $("#editWrapper").show();
+              //downloadFile(this.plain_text, moment().format('YYYYDDMM'));
+          },
           expFile: function() {
+              $("#articlesWrapper").hide();
+              $("#editWrapper").show();
               downloadFile(this.plain_text, moment().format('YYYYDDMM'));
           },
-          openerror: function() {
-              this.$notify.error({
-                  title: '错误',
-                  message: '这是一条错误的提示消息'
-              });
+          backTop() {
+              document.body.scrollTop = 0
+              document.documentElement.scrollTop = 0
           },
   		}
     }); // end vue
