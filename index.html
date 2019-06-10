@@ -13,8 +13,8 @@
 </head>
 <body>
 	<div id="app">
-        <el-row :gutter="18">
-            <el-col :span="13" :offset="6">
+        <el-row :gutter="20">
+            <el-col :span="14" :offset="6">
                 <el-input style="width:500px" placeholder="请输入内容" v-model="url">
                     <template slot="prepend">Http://</template>
                     <i slot="prefix" class="el-input__icon el-icon-search"></i>
@@ -22,45 +22,42 @@
                 <el-button type="primary" plain  @click="issuesList()"><i class="el-icon-search"></i>查询</el-button>
                 <el-button type="primary" plain @click="expZip()"><i class="el-icon-bank-card"></i>导出zip</el-button>
                 <el-button type="primary" plain @click="openEdit()"><i class="el-icon-edit"></i>打开文本</el-button>
+                <el-button type="primary" plain @click="fmtJson()"><i class="el-icon-c-scale-to-original"></i>json格式化</el-button>
                 <el-button type="primary" plain @click="expFile()"><i class="el-icon-document"></i>一键生成</el-button>
             </el-col>
         </el-row>
         <div id="articlesWrapper">
-        <el-table
+            <el-table
                 v-loading="loading"
                 :data="origin_data.filter(data => !search || data.body.toLowerCase().includes(search.toLowerCase()) || data.title.toLowerCase().includes(search.toLowerCase()))"
                 style="width: 100%" :default-sort = "{prop: 'created_at', order: 'descending'}">
-            <el-table-column label="序号" type="index"></el-table-column>
-            <el-table-column label="URL" prop="url"></el-table-column>
-            <el-table-column label="标题" prop="title"></el-table-column>
-            <el-table-column label="标签" :formatter="formatterLabels" prop="labels" sortable></el-table-column>
-            <el-table-column label="内容" prop="body" show-overflow-tooltip></el-table-column>
-            <el-table-column label="创建时间" :formatter="formatterDate" prop="created_at" sortable></el-table-column>
-            <el-table-column label="更新时间" :formatter="formatterDate" prop="updated_at" sortable></el-table-column>
-            <el-table-column label="评论数" prop="comments"></el-table-column>
-            <el-table-column label="状态" prop="state" sortable></el-table-column>
-            <el-table-column align="right">
-                <template slot="header" slot-scope="scope">
-                    <el-input v-model="search" size="mini" placeholder="输入关键字搜索"/>
-                </template>
-            </el-table-column>
-        </el-table>
+                <el-table-column label="序号" type="index"></el-table-column>
+                <el-table-column label="URL" prop="url"></el-table-column>
+                <el-table-column label="标题" prop="title"></el-table-column>
+                <el-table-column label="标签" :formatter="formatterLabels" prop="labels" sortable></el-table-column>
+                <el-table-column label="内容" prop="body" show-overflow-tooltip></el-table-column>
+                <el-table-column label="创建时间" :formatter="formatterDate" prop="created_at" sortable></el-table-column>
+                <el-table-column label="更新时间" :formatter="formatterDate" prop="updated_at" sortable></el-table-column>
+                <el-table-column label="评论数" prop="comments"></el-table-column>
+                <el-table-column label="状态" prop="state" sortable></el-table-column>
+                <el-table-column align="right">
+                    <template slot="header" slot-scope="scope">
+                        <el-input v-model="search" size="mini" placeholder="输入关键字搜索"/>
+                    </template>
+                </el-table-column>
+            </el-table>
         </div>
-        <div id="editWrapper" hidden>
-        <el-input
+        <div id="editWrapper" style="margin-top: 10px" hidden>
+            <el-input
                 type="textarea"
                 placeholder="请输入内容"
                 v-model="plain_text"
                 maxlength="1000"
                 :rows="40"
                 show-word-limit
-        >
-        </el-input>
+            >
+            </el-input>
         </div>
-	<!--el-dialog v-loading="loading" :visible.sync="visible" center :title.sync="title">
-        {{ data }}
-    </el-dialog>-->
-   <!-- <el-input type="textarea" :rows="40" v-model="plain_text"></el-input>-->
         <el-backtop @click="backTop"></el-backtop>
     </div>
 
@@ -75,7 +72,6 @@
         return {
         	visible: false,
         	url: 'https://api.github.com/repos/saltzmanalaric/Mirror-blog/issues',
-            data: 'loading...',
             origin_data: [],
             plain_text: '',
             search: '',
@@ -105,7 +101,7 @@
                     });
                 },
               error: function(err) {
-                  this.$message({
+                  that.$message({
                       showClose: true,
                       message: '请求失败：'+err.responseText,
                       type: 'error'
@@ -162,7 +158,34 @@
           openEdit: function() {
               $("#articlesWrapper").hide();
               $("#editWrapper").show();
-              //downloadFile(this.plain_text, moment().format('YYYYDDMM'));
+          },
+          fmtJson: function() {
+              $("#articlesWrapper").hide();
+              $("#editWrapper").show();
+              if (!this.plain_text) {
+                  this.$message({
+                      message: '请打开文本并输入json格式内容',
+                      type: 'warning'
+                  });
+                  return false;
+              }
+              try {
+                  var obj = JSON.parse(this.plain_text);
+                  if (typeof obj == 'object' && obj) {
+                      this.plain_text = JSON.stringify(JSON.parse(this.plain_text), null, 4);
+                      this.$message({
+                          message: '格式化成功',
+                          type: 'success'
+                      });
+                  } else {
+                      this.$message.error('错了哦，不是json字符串');
+                  }
+              } catch(e) {
+                  this.$message({
+                      dangerouslyUseHTMLString: true,
+                      message: '<strong>错了哦，不是json字符串</strong><br/>'+e
+                  });
+              }
           },
           expFile: function() {
               $("#articlesWrapper").hide();
