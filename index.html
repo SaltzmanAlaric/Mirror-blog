@@ -19,16 +19,33 @@
                     <template slot="prepend">Http://</template>
                     <i slot="prefix" class="el-input__icon el-icon-search"></i>
                 </el-input>
-                <el-button @click="visible = true,issuesList()">查询</el-button>
-                <el-button @click="expZip()">导出zip</el-button>
-                <el-button @click="expFile()">一键生成</el-button>
+                <el-button type="primary" plain  @click="issuesList()">查询</el-button>
+                <el-button type="primary" plain @click="expZip()">导出zip</el-button>
+                <el-button type="primary" plain @click="expFile()">一键生成</el-button>
             </el-col>
         </el-row>
-
+        <el-table
+                :data="origin_data.filter(data => !search || data.body.toLowerCase().includes(search.toLowerCase()) || data.title.toLowerCase().includes(search.toLowerCase()))"
+                style="width: 100%" :default-sort = "{prop: 'created_at', order: 'descending'}">
+            <el-table-column label="序号" type="index"></el-table-column>
+            <el-table-column label="URL" prop="url"></el-table-column>
+            <el-table-column label="标题" prop="title"></el-table-column>
+            <el-table-column label="标签" :formatter="formatterLabels" prop="labels" sortable></el-table-column>
+            <el-table-column label="内容" prop="body" show-overflow-tooltip></el-table-column>
+            <el-table-column label="创建时间" :formatter="formatterDate" prop="created_at" sortable></el-table-column>
+            <el-table-column label="更新时间" :formatter="formatterDate" prop="updated_at" sortable></el-table-column>
+            <el-table-column label="评论数" prop="comments"></el-table-column>
+            <el-table-column label="状态" prop="state" sortable></el-table-column>
+            <el-table-column align="right">
+                <template slot="header" slot-scope="scope">
+                    <el-input v-model="search" size="mini" placeholder="输入关键字搜索"/>
+                </template>
+            </el-table-column>
+        </el-table>
 	<!--el-dialog v-loading="loading" :visible.sync="visible" center :title.sync="title">
         {{ data }}
     </el-dialog>-->
-     <el-input type="textarea" :rows="40" v-model="plain_text"></el-input>
+    <!-- <el-input type="textarea" :rows="40" v-model="plain_text"></el-input>-->
     </div>
 	<!-- import Vue before Element -->
   <script src="https://unpkg.com/vue/dist/vue.js"></script>
@@ -42,9 +59,27 @@
         	visible: false,
         	url: 'https://api.github.com/repos/saltzmanalaric/Mirror-blog/issues',
             data: 'loading...',
-            title: '请求结果',
+            // title: '请求结果',
             origin_data: [],
             plain_text: '',
+            tableData: [/*{
+                date: '2016-05-02',
+                name: '王小虎',
+                address: '上海市普陀区金沙江路 1518 弄'
+            }, {
+                date: '2016-05-04',
+                name: '王小虎',
+                address: '上海市普陀区金沙江路 1517 弄'
+            }, {
+                date: '2016-05-01',
+                name: '王小虎',
+                address: '上海市普陀区金沙江路 1519 弄'
+            }, {
+                date: '2016-05-03',
+                name: '王小虎',
+                address: '上海市普陀区金沙江路 1516 弄'
+            }*/],
+            search: '',
         }
       },
       methods: {
@@ -56,20 +91,13 @@
                 type: 'GET',
                 success: function(data){
                     //console.log(data);
-                    that.title = '花费时间：'+  moment().diff(sendDate) +'毫秒';
+                    var title = '花费时间：'+  moment().diff(sendDate) +'毫秒';
                     that.origin_data = data;
-                    that.data = '';
-                    for (var i=0,size = data.length;i<size;i++) {
-                        //that.data += formatJson(data[i]);//.replace(/<br\/>/g, "");
-                        that.data += (i+1)+"."+data[i].title+"<br/>";
-                    }
-                   /* that.$alert(that.data, that.title, {
-                        dangerouslyUseHTMLString: true
-                    });*/
+                   console.log(that.data)
                     that.$message({
                         showClose: true,
                         dangerouslyUseHTMLString: true,
-                        message: '<h4>'+ that.title+'</h4>'+that.data,
+                        message: title,
                         type: 'success'
                     });
                 },
@@ -83,6 +111,12 @@
               }
             });
 	    	},
+          formatterLabels(value, row, column) {
+              return column.map(function (label) { return label.name; }).join(",");
+          },
+          formatterDate(value, row, column) {
+              return moment(column).format('YYYY-MM-DD HH:mm:ss');
+          },
           expZip: function() {
               var zip = new JSZip();
               var origin_data = this.origin_data;
