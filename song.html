@@ -115,7 +115,12 @@
             },
             // 导出歌单
             expSong: function () {
-                downloadFile(formatJson(JSON.stringify(this.origin_data)), "music" + moment().format('YYYYMMDD') + ".json");
+                var datastr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(this.origin_data));
+                var downloadAnchorNode = document.createElement('a')
+                downloadAnchorNode.setAttribute("href", datastr);
+                downloadAnchorNode.setAttribute("download", "music" + moment().format('YYYYMMDD') + ".json");
+                downloadAnchorNode.click();
+                downloadAnchorNode.remove();
             },
             // 回到顶部
             backTop() {
@@ -131,34 +136,6 @@
     var downloadFile = function (content, file_name) {
         var file = new File([content], file_name, {type: "text/plain;charset=utf-8"});
         saveAs(file);
-    }
-    // 格式化json字符串
-    function formatJson(msg) {
-        var rep = "~";
-        var jsonStr = JSON.stringify(msg, null, rep)
-        var str = "";
-        for (var i = 0; i < jsonStr.length; i++) {
-            var text2 = jsonStr.charAt(i)
-            if (i > 1) {
-                var text = jsonStr.charAt(i - 1)
-                if (rep != text && rep == text2) {
-                    str += "<br/>"
-                }
-            }
-            str += text2;
-        }
-        jsonStr = "";
-        for (var i = 0; i < str.length; i++) {
-            var text = str.charAt(i);
-            if (rep == text)
-                jsonStr += "    ";//"        "
-            else {
-                jsonStr += text;
-            }
-            if (i == str.length - 2)
-                jsonStr += "<br/>"
-        }
-        return jsonStr;
     }
 </script>
 
