@@ -6,6 +6,7 @@
     <link rel="shortcut icon" href="favicon.ico"/>
     <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
     <script type="text/javascript" src="moment.js"></script>
+    <script type="text/javascript" src="jquery-3.3.1.min.js"></script>
 </head>
 <body>
 
@@ -17,36 +18,28 @@
                 <i v-if="!searchIcon" slot="prefix" class="el-input__icon el-icon-search"></i>
                 <i v-if="searchIcon" slot="prefix" class="el-input__icon el-icon-loading"></i>
             </el-input>
-            <el-button type="primary" plain @click="searchIcon = true,issuesList()"><i class="el-icon-search"></i>查询</el-button>
-            <el-button type="primary" plain @click="expZip()"><i class="el-icon-bank-card"></i>导出zip</el-button>
-            <el-button type="primary" plain @click="openEdit()"><i class="el-icon-edit"></i>打开文本</el-button>
-            <el-button type="primary" plain @click="fmtJson()"><i class="el-icon-c-scale-to-original"></i>json格式化</el-button>
-            <el-button type="primary" plain @click="expFile()"><i class="el-icon-document"></i>一键生成</el-button>
-            <el-button type="primary" plain @click="reset()" icon="el-icon-refresh">重置</el-button>
+            <el-button type="primary" plain @click="searchIcon = true,songList()"><i class="el-icon-search"></i>查询</el-button>
+            <el-button type="primary" plain @click="expSong()"><i class="el-icon-document"></i>下载歌单</el-button>
         </el-col>
     </el-row>
-    <div id="articlesWrapper">
+    <div id="songsWrapper">
         <el-table style="width: 100%"
-                  :data="origin_data.filter(data => !search || data.body.toLowerCase().includes(search.toLowerCase()) || data.title.toLowerCase().includes(search.toLowerCase()))"
+                  :data="origin_data.filter(data => !search || data.name.toLowerCase().includes(search.toLowerCase()) || data.singer.toLowerCase().includes(search.toLowerCase()))"
                   :default-sort="{prop: 'created_at', order: 'descending'}">
             <el-table-column label="序号" type="index"></el-table-column>
-            <el-table-column label="URL" prop="url"></el-table-column>
-            <el-table-column label="标题" prop="title"></el-table-column>
-            <el-table-column label="标签" :formatter="fmtLabels" prop="labels" sortable></el-table-column>
-            <el-table-column label="内容" prop="body" show-overflow-tooltip></el-table-column>
-            <el-table-column label="创建时间" :formatter="fmtDate" prop="created_at" sortable></el-table-column>
-            <el-table-column label="更新时间" :formatter="fmtDate" prop="updated_at" sortable></el-table-column>
-            <el-table-column label="评论数" prop="comments"></el-table-column>
-            <el-table-column label="状态" prop="state" sortable></el-table-column>
+            <el-table-column label="id" prop="id"></el-table-column>
+            <el-table-column label="歌曲名" prop="name"></el-table-column>
+            <el-table-column label="歌手" prop="singer" sortable></el-table-column>
+            <el-table-column label="专辑" prop="album" ></el-table-column>
+            <el-table-column label="来源" prop="source" sortable></el-table-column>
+            <el-table-column label="歌曲路径" prop="link_url" sortable></el-table-column>
+            <el-table-column label="歌词路径" prop="link_lrc"></el-table-column>
             <el-table-column align="right">
                 <template slot="header" slot-scope="scope">
                     <el-input v-model="search" size="mini" placeholder="输入关键字搜索"/>
                 </template>
             </el-table-column>
         </el-table>
-    </div>
-    <div id="editWrapper" style="margin-top: 10px" hidden>
-        <el-input type="textarea" placeholder="请输入内容" v-model="plain_text" maxlength="1000" :rows="40" show-word-limit></el-input>
     </div>
     <el-backtop @click="backTop"></el-backtop>
 </div>
@@ -60,19 +53,17 @@
         el: '#app',
         data: function () {
             return {
-                url: 'https://api.github.com/repos/saltzmanalaric/Mirror-blog/issues',
+                url: 'https://saltzmanalaric.github.io/music-player/music.json',
                 origin_data: [],
-                plain_text: '',
                 search: '',
                 text: '',
-                textarea: '',
                 searchIcon: false,
             }
         },
         methods: {
-            // issues列表
-            issuesList() {
-                showArticles();
+            // 歌曲列表
+            songList() {
+                $("#songsWrapper").show();
                 var that = this;
                 var sendDate = moment();
                 $.ajax({
@@ -115,90 +106,15 @@
             },
             // 重置
             reset() {
-                this.url = 'https://api.github.com/repos/saltzmanalaric/Mirror-blog/issues';
+                this.url = 'https://saltzmanalaric.github.io/music-player/music.json';
                 this.origin_data = [];
-                this.plain_text = '';
                 this.search = '';
                 this.text = '';
-                this.textarea = '';
                 this.searchIcon = false;
             },
-            // 导出zip
-            expZip: function () {
-                showArticles();
-                var zip = new JSZip();
-                var origin_data = this.origin_data;
-                if (!origin_data || origin_data.length == 0) {
-                    this.$message({
-                        showClose: true,
-                        message: '导出失败，可能无数据哦，请重新查询',
-                        type: 'error'
-                    });
-                    return;
-
-                }
-                for (var i = 0, size = origin_data.length; i < size; i++) {
-                    var title = i + "." + origin_data[i].title + ".md";
-                    var content = '';
-                    var create = moment(origin_data[i].created_at).format('YYYY-MM-DD HH:mm:ss');
-                    var update = moment(origin_data[i].updated_at).format('YYYY-MM-DD HH:mm:ss');
-                    var labels = [];
-                    if (origin_data[i].labels) {
-                        for (var index in origin_data[i].labels) {
-                            labels.push(origin_data[i].labels[index].name);
-                        }
-                    }
-                    content = '---\n';
-                    content += 'title: ' + origin_data[i].title + '\n';
-                    content += 'create: ' + create + '\n';
-                    content += 'update: ' + update + '\n';
-                    content += 'labels: ' + labels.join(',') + '\n';
-                    content += '---\n';
-                    content += origin_data[i].body;
-
-                    zip.file(title, content);
-                }
-                zip.generateAsync({type: "blob"}).then(function (content) {
-                    saveAs(content, "articles" + moment().format('YYYYDDMM') + ".zip");
-                });
-            },
-            // 打开文本编辑
-            openEdit: function () {
-                showEdit();
-            },
-            // 格式化json字符串
-            fmtJson: function () {
-                showEdit();
-                if (!this.plain_text) {
-                    this.$message({
-                        message: '请打开文本并输入json格式内容',
-                        type: 'warning'
-                    });
-                    return false;
-                }
-                try {
-                    var obj = JSON.parse(this.plain_text);
-                    if (typeof obj == 'object' && obj) {
-                        this.plain_text = JSON.stringify(JSON.parse(this.plain_text), null, 4);
-                        this.$message({
-                            message: '格式化成功',
-                            type: 'success'
-                        });
-                    } else {
-                        this.$message.error('错了哦，不是json字符串');
-                    }
-                } catch (e) {
-                    this.$message({
-                        type: 'error',
-                        dangerouslyUseHTMLString: true,
-                        message: '<strong>错了哦，不是json字符串</strong><br/>' + e
-                    });
-                }
-            },
-            // 导出文件
-            expFile: function () {
-                showEdit();
-                downloadFile(this.plain_text, moment().format('YYYYMMDD'));
+            // 导出歌单
+            expSong: function () {
+                downloadFile(formatJson(JSON.stringify(this.origin_data)), "music" + moment().format('YYYYMMDD') + ".json");
             },
             // 回到顶部
             backTop() {
@@ -208,20 +124,6 @@
         }
     }); // end vue
 
-    //textarea支持tab缩进
-    $("textarea").on('keydown', function (e) {
-        if (e.keyCode == 9) {
-            e.preventDefault();
-            var indent = '    ';
-            var start = this.selectionStart;
-            var end = this.selectionEnd;
-            var selected = window.getSelection().toString();
-            selected = indent + selected.replace(/\n/g, '\n' + indent);
-            this.value = this.value.substring(0, start) + selected + this.value.substring(end);
-            this.setSelectionRange(start + indent.length, start + selected.length);
-        }
-    })
-
     /**
      * 下载文件
      */
@@ -229,19 +131,6 @@
         var file = new File([content], file_name, {type: "text/plain;charset=utf-8"});
         saveAs(file);
     }
-
-    // 展示issues列表
-    var showArticles = function() {
-        $("#articlesWrapper").show();
-        $("#editWrapper").hide();
-    }
-
-    // 展示文本编辑
-    var showEdit = function() {
-        $("#editWrapper").show();
-        $("#articlesWrapper").hide();
-    }
-
     // 格式化json字符串
     function formatJson(msg) {
         var rep = "~";
