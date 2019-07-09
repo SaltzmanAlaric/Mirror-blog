@@ -157,7 +157,7 @@
                     content += 'update: ' + update + '\n';
                     content += 'labels: ' + labels.join(',') + '\n';
                     content += '---\n';
-                    content == origin_data[i].body;
+                    content += origin_data[i].body;
 
                     zip.file(title, content);
                 }
