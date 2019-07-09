@@ -34,12 +34,12 @@
             <el-table-column label="来源" prop="source" sortable></el-table-column>
             <el-table-column label="歌曲路径" :formatter="fmtUrl" show-overflow-tooltip prop="link_url">
                 <template slot-scope="scope">
-                    <a href="{{scope.row.link_url}}">{{scope.row.link_url}}</a>
+                    <a :href="scope.row.link_url" target="_blank">{{scope.row.link_url}}</a>
                 </template>
             </el-table-column>
             <el-table-column label="歌词路径" :formatter="fmtUrl" show-overflow-tooltip prop="link_lrc">
                 <template slot-scope="scope">
-                    <a href="{{scope.row.link_lrc}}">{{scope.row.link_lrc}}</a>
+                    <a :href="scope.row.link_lrc" target="_blank">{{scope.row.link_lrc}}</a>
                 </template>
             </el-table-column>
             <el-table-column align="right">
