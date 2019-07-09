@@ -25,7 +25,9 @@
     <div id="songsWrapper">
         <el-table style="width: 100%"
                   :data="origin_data.filter(data => !search || data.name.toLowerCase().includes(search.toLowerCase()) || data.singer.toLowerCase().includes(search.toLowerCase()))"
-                  :default-sort="{prop: 'created_at', order: 'descending'}">
+                  :default-sort="{prop: 'created_at', order: 'descending'}"
+                  @selection-change="changeFun">
+            <el-table-column type="selection"></el-table-column>
             <el-table-column label="序号" type="index"></el-table-column>
             <el-table-column label="id" prop="id"></el-table-column>
             <el-table-column label="歌曲名" prop="name" sortable></el-table-column>
@@ -66,9 +68,13 @@
                 search: '',
                 text: '',
                 searchIcon: false,
+                checkBoxData: [],    //多选框选择的值
             }
         },
         methods: {
+            changeFun(val) {
+                this.checkBoxData = val;
+            },
             // 歌曲列表
             songList() {
                 $("#songsWrapper").show();
