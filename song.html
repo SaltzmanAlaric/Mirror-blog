@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
     <script type="text/javascript" src="moment.js"></script>
     <script type="text/javascript" src="jquery-3.3.1.min.js"></script>
-    <script type="text/javascript" type="text/javascript" src="FileSave.js"></script>
 </head>
 <body>
 
@@ -33,8 +32,8 @@
             <el-table-column label="歌手" prop="singer" sortable></el-table-column>
             <el-table-column label="专辑" prop="album" sortable></el-table-column>
             <el-table-column label="来源" prop="source" sortable></el-table-column>
-            <el-table-column label="歌曲路径" prop="link_url"></el-table-column>
-            <el-table-column label="歌词路径" prop="link_lrc"></el-table-column>
+            <el-table-column label="歌曲路径" :formatter="fmtUrl" show-overflow-tooltip prop="link_url"></el-table-column>
+            <el-table-column label="歌词路径" :formatter="fmtUrl" show-overflow-tooltip prop="link_lrc"></el-table-column>
             <el-table-column align="right">
                 <template slot="header" slot-scope="scope">
                     <el-input v-model="search" size="mini" placeholder="输入关键字搜索"/>
@@ -95,11 +94,9 @@
                     }
                 });
             },
-            // 格式化标签
-            fmtLabels(value, row, column) {
-                return column.map(function (label) {
-                    return label.name;
-                }).join(",");
+            // 路径下载
+            fmtUrl(value, row, column) {
+                return "<a href='" + column + "'>" + column + "</a>";
             },
             // 格式化日期
             fmtDate(value, row, column) {
@@ -130,13 +127,6 @@
         }
     }); // end vue
 
-    /**
-     * 下载文件
-     */
-    var downloadFile = function (content, file_name) {
-        var file = new File([content], file_name, {type: "text/plain;charset=utf-8"});
-        saveAs(file);
-    }
 </script>
 
 </body>
