@@ -21,7 +21,8 @@
                 <i v-if="searchIcon" slot="prefix" class="el-input__icon el-icon-loading"></i>
             </el-input>
             <el-button type="primary" plain @click="searchIcon = true,issuesList()"><i class="el-icon-search"></i>查询</el-button>
-            <el-button type="primary" plain @click="expZip()"><i class="el-icon-bank-card"></i>导出zip</el-button>
+            <el-button type="primary" plain @click="expZip(true)"><i class="el-icon-bank-card"></i>导出全部zip</el-button>
+            <el-button type="primary" plain @click="expZip(false)"><i class="el-icon-bank-card"></i>导出选中zip</el-button>
             <el-button type="primary" plain @click="openEdit()"><i class="el-icon-edit"></i>打开文本</el-button>
             <el-button type="primary" plain @click="fmtJson()"><i class="el-icon-c-scale-to-original"></i>json格式化</el-button>
             <el-button type="primary" plain @click="expFile()"><i class="el-icon-document"></i>一键生成</el-button>
@@ -31,7 +32,8 @@
     <div id="articlesWrapper">
         <el-table style="width: 100%"
                   :data="origin_data.filter(data => !search || data.body.toLowerCase().includes(search.toLowerCase()) || data.title.toLowerCase().includes(search.toLowerCase()))"
-                  :default-sort="{prop: 'created_at', order: 'descending'}">
+                  :default-sort="{prop: 'created_at', order: 'descending'}"
+                  @selection-change="changeFun">
             <el-table-column label="序号" type="index"></el-table-column>
             <el-table-column label="URL" prop="url"></el-table-column>
             <el-table-column label="标题" prop="title"></el-table-column>
@@ -70,9 +72,13 @@
                 text: '',
                 textarea: '',
                 searchIcon: false,
+                checkBoxData: [],    //多选框选择的值
             }
         },
         methods: {
+            changeFun(val) {
+                this.checkBoxData = val;
+            },
             // issues列表
             issuesList() {
                 showArticles();
@@ -127,10 +133,10 @@
                 this.searchIcon = false;
             },
             // 导出zip
-            expZip: function () {
+            expZip: function (isAll) {
                 showArticles();
                 var zip = new JSZip();
-                var origin_data = this.origin_data;
+                var origin_data = isAll ? this.origin_data : this.checkBoxData;
                 if (!origin_data || origin_data.length == 0) {
                     this.$message({
                         showClose: true,

@@ -19,7 +19,8 @@
                 <i v-if="searchIcon" slot="prefix" class="el-input__icon el-icon-loading"></i>
             </el-input>
             <el-button type="primary" plain @click="searchIcon = true,songList()"><i class="el-icon-search"></i>查询</el-button>
-            <el-button type="primary" plain @click="expSong()"><i class="el-icon-document"></i>下载歌单</el-button>
+            <el-button type="primary" plain @click="expSong(true)"><i class="el-icon-document"></i>下载全部歌单</el-button>
+            <el-button type="primary" plain @click="expSong(false)"><i class="el-icon-document"></i>下载选中歌单</el-button>
         </el-col>
     </el-row>
     <div id="songsWrapper">
@@ -108,14 +109,6 @@
                     }
                 });
             },
-            // 路径下载
-            fmtUrl(value, row, column) {
-                return "<a href='" + column + "'>" + column + "</a>";
-            },
-            // 格式化日期
-            fmtDate(value, row, column) {
-                return moment(column).format('YYYY-MM-DD HH:mm:ss');
-            },
             // 重置
             reset() {
                 this.url = 'https://saltzmanalaric.github.io/music-player/music.json';
@@ -125,8 +118,9 @@
                 this.searchIcon = false;
             },
             // 导出歌单
-            expSong: function () {
-                var datastr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(this.origin_data));
+            expSong: function (isAll) {debugger
+                var data = isAll ? this.origin_data : this.checkBoxData;
+                var datastr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
                 var downloadAnchorNode = document.createElement('a')
                 downloadAnchorNode.setAttribute("href", datastr);
                 downloadAnchorNode.setAttribute("download", "music" + moment().format('YYYYMMDD') + ".json");
