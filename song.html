@@ -12,7 +12,7 @@
 
 <div id="app" style="padding: 10px;">
     <el-row :gutter="0" type="flex" justify="center">
-        <el-col :span="10">
+        <el-col :span="12">
             <el-input style="width:500px" placeholder="请输入内容" v-model="url">
                 <!-- <template slot="prepend">Http://</template>-->
                 <i v-if="!searchIcon" slot="prefix" class="el-input__icon el-icon-search"></i>
@@ -118,8 +118,17 @@
                 this.searchIcon = false;
             },
             // 导出歌单
-            expSong: function (isAll) {debugger
+            expSong: function (isAll) {
                 var data = isAll ? this.origin_data : this.checkBoxData;
+                if (!data || data.length == 0) {
+                    this.$message({
+                        showClose: true,
+                        message: '导出失败，可能无数据哦，请重新查询',
+                        type: 'error'
+                    });
+                    return;
+
+                }
                 var datastr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
                 var downloadAnchorNode = document.createElement('a')
                 downloadAnchorNode.setAttribute("href", datastr);
