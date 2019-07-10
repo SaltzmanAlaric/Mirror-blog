@@ -38,7 +38,8 @@
             <el-table-column label="格式" prop="format" ></el-table-column>
             <el-table-column label="歌曲路径" show-overflow-tooltip prop="link_url">
                 <template slot-scope="scope">
-                    <a :href="'https://saltzmanalaric.github.io/music-player/'+scope.row.link_url" download=scope.row.link_url.replace('.mp3'. scope.row.format)>{{scope.row.link_url}}</a>
+                    <a :href="'https://saltzmanalaric.github.io/music-player/'+scope.row.link_url" download=scope.row.link_url.replace('.mp3'.
+                       {{scope.row.format}})>{{scope.row.link_url}}</a>
                 </template>
             </el-table-column>
             <el-table-column label="歌词路径" show-overflow-tooltip prop="link_lrc">
