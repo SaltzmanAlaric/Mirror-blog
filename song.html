@@ -43,7 +43,8 @@
             </el-table-column>
             <el-table-column label="歌词路径" show-overflow-tooltip prop="link_lrc">
                 <template slot-scope="scope">
-                    <a :href="'https://saltzmanalaric.github.io/music-player/'+scope.row.link_lrc" download>{{scope.row.link_lrc}}</a>
+                    <span v-if="{{scope.row.link_lrc == 'audio/unknow.lrc'}}">无</span>
+                    <a v-else :href="'https://saltzmanalaric.github.io/music-player/'+scope.row.link_lrc" download>{{scope.row.link_lrc}}</a>
                 </template>
             </el-table-column>
             <el-table-column align="right">
