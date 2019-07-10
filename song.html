@@ -32,7 +32,7 @@
             <el-table-column label="序号" type="index"></el-table-column>
             <el-table-column label="播放" type="index">
                 <template slot-scope="scope">
-                    <audio src="'https://saltzmanalaric.github.io/music-player/'+scope.row.link_url" controls="controls">✖</audio>
+                    <audio :src="'https://saltzmanalaric.github.io/music-player/'+scope.row.link_url" controls="controls">✖</audio>
                 </template>
             </el-table-column>
             <el-table-column label="id" prop="id"></el-table-column>
