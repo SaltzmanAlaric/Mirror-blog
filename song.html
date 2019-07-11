@@ -37,9 +37,9 @@
                 </template>
             </el-table-column>
             <el-table-column label="id" prop="id"></el-table-column>
-            <el-table-column label="歌曲名" prop="name" show-overflow-tooltip sortable></el-table-column>
-            <el-table-column label="歌手" prop="singer" show-overflow-tooltip sortable></el-table-column>
-            <el-table-column label="专辑" prop="album" show-overflow-tooltip sortable></el-table-column>
+            <el-table-column label="歌曲名" :formatter="fmtName" prop="name" show-overflow-tooltip sortable></el-table-column>
+            <el-table-column label="歌手" :formatter="fmtName" prop="singer" show-overflow-tooltip sortable></el-table-column>
+            <el-table-column label="专辑" :formatter="fmtName" prop="album" show-overflow-tooltip sortable></el-table-column>
             <el-table-column label="来源" prop="source" sortable></el-table-column>
             <el-table-column label="格式" prop="format" sortable></el-table-column>
             <el-table-column label="歌曲路径" show-overflow-tooltip prop="link_url">
@@ -124,6 +124,10 @@
                 this.search = '';
                 this.text = '';
                 this.searchIcon = false;
+            },
+            // 格式化名称
+            fmtName: function (value, row, column) {
+                return column.replace(/[\/?<>*|]/g, '_');
             },
             // 导出歌单
             expSong: function (isAll) {
