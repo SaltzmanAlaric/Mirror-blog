@@ -25,7 +25,7 @@
     </el-row>
     <div id="songsWrapper">
         <el-table style="width: 100%"
-                  :data="origin_data.filter(data => !search || data.name.toLowerCase().includes(search.toLowerCase()) || data.singer.toLowerCase().includes(search.toLowerCase()))"
+                  :data="origin_data.filter(data => !search || data.name.toLowerCase().includes(search.replace(/[\/?<>*|]/g, '_').toLowerCase()) || data.singer.toLowerCase().includes(search.replace(/[\/?<>*|]/g, '_').toLowerCase()))"
                   :default-sort="{prop: 'created_at', order: 'descending'}"
                   @selection-change="changeFun">
             <el-table-column type="selection"></el-table-column>
