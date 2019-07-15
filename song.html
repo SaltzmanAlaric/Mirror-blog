@@ -93,7 +93,7 @@
                     url: this.url,
                     type: 'GET',
                     success: function (data) {
-                        console.log(data);
+                        console.table(data);
                         that.origin_data = data;
                         var cost_time = moment().diff(sendDate) + 'ms';
                         console.log(cost_time);
