@@ -169,7 +169,7 @@
                     zip.file(title, content);
                 }
                 zip.generateAsync({type: "blob"}).then(function (content) {
-                    saveAs(content, "articles" + moment().format('YYYYDDMM') + ".zip");
+                    saveAs(content, "articles" + moment().format('YYYYMMDD') + ".zip");
                 });
             },
             // 打开文本编辑
